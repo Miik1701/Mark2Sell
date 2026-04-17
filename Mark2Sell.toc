@@ -1,0 +1,15 @@
+## Interface: 120001
+## Version: 1.0.1
+## Title: Mark2Sell
+## Notes: Mark inventory items with a key press and list them
+## Author: Mik1701
+## SavedVariablesPerCharacter: ItemMarkerDB
+
+
+Locale.lua
+Logging.lua
+ItemMarker.lua
+SetupWizard.lua
+Options.lua
+BagClearMarksButton.lua
+MerchantSellButton.lua

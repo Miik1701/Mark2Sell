@@ -1,0 +1,13 @@
+<Bindings>
+    <Binding name="ITEMMARKER_TOGGLE_MARK" category="BINDING_HEADER_MARK2SELL">
+        ItemMarker_ToggleMark()
+    </Binding>
+
+    <Binding name="ITEMMARKER_CLEAR_ALL" category="BINDING_HEADER_MARK2SELL">
+        ItemMarker_ClearAllMark()
+    </Binding>
+
+    <Binding name="ITEMMARKER_SHOW_LIST" category="BINDING_HEADER_MARK2SELL">
+        ItemMarker_ShowList()
+    </Binding>
+</Bindings>
