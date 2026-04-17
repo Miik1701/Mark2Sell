@@ -1,5 +1,5 @@
 ## Interface: 120001
-## Version: 1.0.2
+## Version: 1.0.3
 ## Title: Mark2Sell
 ## Notes: Mark inventory items with a key press and list them
 ## Author: Mik1701
