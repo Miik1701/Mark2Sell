@@ -1,0 +1,94 @@
+# Bumps ## Version in Mark2Sell.toc and pushes git tag vX.Y.Z when a commit message
+# contains an explicit release marker. CurseForge (BigWigs packager) can then package the tag.
+#
+# Trigger format (anywhere in the commit message, case-sensitive tag name):
+#   [release] 1.2.3
+#   [release] v1.2.3
+# Only MAJOR.MINOR.PATCH (digits) is captured; pre-release labels are not supported here.
+#
+# The workflow commits a follow-up "chore(release): ..." without [release], so it does not loop.
+#
+# Repo layout: set TOC_FILE to the path of Mark2Sell.toc relative to the repository root.
+# - Addon-only repo (Mark2Sell.toc at root): Mark2Sell.toc
+# - Monorepo: e.g. src/Mark2Sell/Mark2Sell.toc
+
+name: Release version from commit
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+concurrency:
+  group: mark2sell-release-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  TOC_FILE: Mark2Sell.toc
+
+jobs:
+  bump-and-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version from commit message
+        id: ver
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          set -euo pipefail
+          MSG="${COMMIT_MESSAGE//$'\r'/}"
+          if [[ ! "$MSG" =~ \[release\][[:space:]]+v?([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+            echo "No [release] X.Y.Z pattern in commit message — skipping."
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          VERSION="${BASH_REMATCH[1]}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "should_run=true" >> "$GITHUB_OUTPUT"
+          echo "Detected release version: $VERSION"
+
+      - name: Verify toc file exists
+        if: steps.ver.outputs.should_run == 'true'
+        run: |
+          test -f "$TOC_FILE" || { echo "Missing $TOC_FILE — set env TOC_FILE in the workflow."; exit 1; }
+
+      - name: Refuse duplicate tag
+        if: steps.ver.outputs.should_run == 'true'
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "Tag v$VERSION already exists."
+            exit 1
+          fi
+
+      - name: Update Mark2Sell.toc version
+        if: steps.ver.outputs.should_run == 'true'
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          sed -i -E "s/^## Version:.*$/## Version: $VERSION/" "$TOC_FILE"
+          grep -q "^## Version: $VERSION\$" "$TOC_FILE"
+
+      - name: Commit, push, and tag
+        if: steps.ver.outputs.should_run == 'true'
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$TOC_FILE"
+          git commit -m "chore(release): Mark2Sell $VERSION" -m "Automated bump from commit message [release] $VERSION"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          git tag -a "v$VERSION" -m "Mark2Sell $VERSION"
+          git push origin "v$VERSION"
