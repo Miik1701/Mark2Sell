@@ -1,0 +1,8 @@
+package-as: Mark2Sell
+ignore:
+    - .gitignore
+    - .github
+    - README.md
+manual-changelog:
+    filename: CHANGELOG.txt
+    markup-type: markdown
