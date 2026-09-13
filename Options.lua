@@ -35,9 +35,22 @@ end
 local function GetLocaleDropdownOptions()
     local container = Settings.CreateControlTextContainer()
     container:Add("auto", ItemMarker:L("SETTINGS_LANG_AUTO"))
-    container:Add("de", ItemMarker:L("SETTINGS_LANG_DE"))
-    container:Add("en", ItemMarker:L("SETTINGS_LANG_EN"))
+    for _, entry in ipairs(ItemMarker:GetRegisteredLocales()) do
+        container:Add(entry.code, entry.name)
+    end
     return container:GetData()
+end
+
+local function IsKnownLocalePreference(value)
+    if value == "auto" then
+        return true
+    end
+    for _, entry in ipairs(ItemMarker:GetRegisteredLocales()) do
+        if entry.code == value then
+            return true
+        end
+    end
+    return false
 end
 
 local function InitOptions()
@@ -57,9 +70,19 @@ local function InitOptions()
     local function GetLocalePreference()
         ItemMarkerDB = ItemMarkerDB or {}
         local v = ItemMarkerDB.localePreference
-        if v == "de" or v == "en" or v == "auto" then
+        -- Alte Werte ("de" / "en") auf neue Locale-Codes umbiegen.
+        if v == "de" then
+            v = "deDE"
+            ItemMarkerDB.localePreference = v
+        elseif v == "en" then
+            v = "enUS"
+            ItemMarkerDB.localePreference = v
+        end
+        if IsKnownLocalePreference(v) then
             return v
         end
+        -- Präferenz zeigt auf ein nicht geladenes Pack: als "auto" darstellen,
+        -- den gespeicherten Wert aber nicht überschreiben (Pack kann später aktiv sein).
         return "auto"
     end
 

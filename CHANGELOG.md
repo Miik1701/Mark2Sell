@@ -2,6 +2,10 @@
 
 A short list of what changed in each version of Mark2Sell.
 
+## [1.1.1]
+
+- **Language packs** - Mark2Sell now ships with **English only**. Other languages are separate addons that register themselves through a new public API (`ItemMarker:RegisterLocale`). The reference **German** pack lives beside the addon as **`Mark2Sell_deDE`**. Automatic mode uses the WoW client language when a matching pack is installed and otherwise falls back to English. Existing saved preferences (`de` / `en`) are migrated to `deDE` / `enUS`.
+
 ## [1.1.0]
 
 - **World of Warcraft 12.1.0** — Mark2Sell is marked compatible with patch **12.1.0** (was 12.0.5).

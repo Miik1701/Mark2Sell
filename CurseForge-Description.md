@@ -15,7 +15,7 @@
 
 **Settings & data**
 
-- **Interface language:** English or German - follows the client by default, with an optional override in addon settings.
+- **Interface language:** Mark2Sell ships with **English**. Additional languages are **optional language-pack addons** (e.g. `Mark2Sell_deDE` for German). With a pack installed, automatic mode follows the WoW client language; without one, the addon stays on English. The language can also be forced in addon settings.
 - **Saved variables:** `ItemMarkerDB` is stored **per character** (marks and options are not shared across alts).
 - **Debug mode** (in settings): enables an extra keybinding that **lists marked item links in chat** for troubleshooting; that binding is not shown in the wizard.
 

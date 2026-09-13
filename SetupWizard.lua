@@ -85,12 +85,34 @@ local function ApplyOffsets(x, y)
     end
 end
 
+local function IsKnownLocaleValue(value)
+    if value == "auto" then
+        return true
+    end
+    for _, entry in ipairs(ItemMarker:GetRegisteredLocales()) do
+        if entry.code == value then
+            return true
+        end
+    end
+    return false
+end
+
 local function GetWizardLocaleValue()
     ItemMarkerDB = ItemMarkerDB or {}
     local v = ItemMarkerDB.localePreference
-    if v == "de" or v == "en" or v == "auto" then
+    -- Alte Werte ("de" / "en") auf die neuen Locale-Codes umbiegen.
+    if v == "de" then
+        v = "deDE"
+        ItemMarkerDB.localePreference = v
+    elseif v == "en" then
+        v = "enUS"
+        ItemMarkerDB.localePreference = v
+    end
+    if IsKnownLocaleValue(v) then
         return v
     end
+    -- Präferenz zeigt auf ein nicht geladenes Pack: Anzeige = "auto",
+    -- gespeicherter Wert bleibt aber erhalten.
     return "auto"
 end
 
@@ -98,10 +120,21 @@ local function GetLocaleChoiceLabel(value)
     if value == "auto" then
         return ItemMarker:L("SETTINGS_LANG_AUTO")
     end
-    if value == "de" then
-        return ItemMarker:L("SETTINGS_LANG_DE")
+    for _, entry in ipairs(ItemMarker:GetRegisteredLocales()) do
+        if entry.code == value then
+            return entry.name
+        end
     end
-    return ItemMarker:L("SETTINGS_LANG_EN")
+    return value
+end
+
+-- Reihenfolge im Dropdown/Fallback: "auto" zuerst, danach alle registrierten Locales.
+local function GetLocaleChoiceOrder()
+    local order = { "auto" }
+    for _, entry in ipairs(ItemMarker:GetRegisteredLocales()) do
+        table.insert(order, entry.code)
+    end
+    return order
 end
 
 local function RefreshKeybindRowLabels()
@@ -148,12 +181,10 @@ local function RefreshWizardTexts()
     ui.laterBtn:SetText(ItemMarker:L("SETUP_WIZARD_LATER"))
     RefreshLangDropdownDisplay()
     if ui.langPickFb then
-        for _, val in ipairs({ "auto", "de", "en" }) do
-            local btn = ui.langPickFb[val]
-            if btn then
-                btn:SetText(GetLocaleChoiceLabel(val))
-                btn:SetAlpha(GetWizardLocaleValue() == val and 1 or 0.55)
-            end
+        local cur = GetWizardLocaleValue()
+        for val, btn in pairs(ui.langPickFb) do
+            btn:SetText(GetLocaleChoiceLabel(val))
+            btn:SetAlpha(cur == val and 1 or 0.55)
         end
     end
     RefreshKeybindRowLabels()
@@ -175,7 +206,7 @@ local function Mark2Sell_LangDropInit(_, level)
         return
     end
     local cur = GetWizardLocaleValue()
-    for _, val in ipairs({ "auto", "de", "en" }) do
+    for _, val in ipairs(GetLocaleChoiceOrder()) do
         local info = UIDropDownMenu_CreateInfo()
         info.text = GetLocaleChoiceLabel(val)
         info.value = val
@@ -394,7 +425,7 @@ local function EnsureWindow()
         local gap = 6
         local firstBtn
         local prevBtn
-        for i, val in ipairs({ "auto", "de", "en" }) do
+        for i, val in ipairs(GetLocaleChoiceOrder()) do
             local b = CreateFrame("Button", nil, win, "UIPanelButtonTemplate")
             b:SetSize(100, 24)
             b:SetScript("OnClick", function()
