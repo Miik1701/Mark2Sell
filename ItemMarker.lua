@@ -29,17 +29,38 @@ local function GetBagSlotGUID(bagID, slot)
     end
 end
 
---- Findet einen ContainerFrame-Item-Button unter dem Mauszeiger (Standard-Taschen-UI).
+-- Returns the bag index for a button frame, compatible with both standard Blizzard
+-- ContainerFrame buttons and BagBrother/Bagnon item buttons (which store bag in .bag).
+local function GetButtonBag(button)
+    if button.bag ~= nil then
+        return button.bag
+    end
+    if button.GetBagID then
+        local ok, id = pcall(button.GetBagID, button)
+        if ok then return id end
+    end
+end
+
+--- Findet einen ContainerFrame-Item-Button unter dem Mauszeiger (Standard- und BB-UI).
 local function GetContainerItemButtonUnderCursor()
     for _, focus in ipairs(GetMouseFoci()) do
         local region = focus
         local depth = 0
         while region and depth < 24 do
-            if region.GetBagID and region.GetID and region.HasItem then
-                local bagID = region:GetBagID()
+            if region.GetID then
                 local slot = region:GetID()
-                if bagID ~= nil and slot and region:HasItem() then
-                    return bagID, slot
+                if slot then
+                    -- BagBrother/Bagnon: .bag and .info are always set on item buttons.
+                    if region.bag ~= nil and region.info ~= nil and region.hasItem then
+                        return region.bag, slot
+                    end
+                    -- Standard Blizzard ContainerFrame item button.
+                    if region.GetBagID and region.HasItem then
+                        local ok, bagID = pcall(region.GetBagID, region)
+                        if ok and bagID ~= nil and region:HasItem() then
+                            return bagID, slot
+                        end
+                    end
                 end
             end
             region = region:GetParent()
@@ -138,7 +159,7 @@ function ItemMarker:ShowMarkedList()
 end
 
 function ItemMarker:UpdateButtonOverlay(button)
-    local bagID = button:GetBagID()
+    local bagID = GetButtonBag(button)
     local slot = button:GetID()
     local guid = GetBagSlotGUID(bagID, slot)
     local show = guid and GetMarkedTable()[guid]

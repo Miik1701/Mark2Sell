@@ -7,6 +7,7 @@
 - **Toggle mark** - With the mouse over a bag slot, press your keybind to mark or unmark that stack instance.
 - **Clear all marks** - Keybind to wipe every mark at once.
 - **Bag overlay** - Marked slots get a clear visual indicator.
+- **BagBrother** - Optional compatibility with **BagBrother** (and **Bagnon** / **Bagnonium**): marks, overlays, and the clear-marks button work in those bag windows when the addon is loaded.
 - **Merchant helper** - While a vendor window is open, use the addon control to **sell all marked items** (respects normal sell delays and locked slots).
 - **Clear-marks button** - Optional button near the bags UI; position is adjustable in settings or the setup wizard.
 - **Setup wizard** - First-run (and repeatable) flow for language, keybinds, and clear-button placement. Open anytime with **`/m2s`**.
@@ -76,5 +77,4 @@ If the git repository root is **above** this addon folder, set `TOC_FILE` in the
 - Publish on **CurseForge** (and/or other addon hosts).
 - **CI/CD** - automated packaging and version bump via GitHub Actions (see **Releasing a new version** above).
 - **Language packs** - support for optional add-on locale plugins (community or separate load-on-demand packs) so translations beyond built-in EN/DE can be added without forking the main addon.
-- **Bagnon** - compatibility with Bagnon (and similar bag UIs) so marks and overlays work there, not only the default Blizzard bags.
 - **Mark2Disenchant** - planned companion addon later, in the same spirit as Mark2Sell but for disenchanting workflows.
